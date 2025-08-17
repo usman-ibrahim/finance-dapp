@@ -11,9 +11,7 @@ const { ethereum } = window;
 
 const createEthereumContract = () => {
     const provider = new BrowserProvider(window.ethereum);
-    // await provider.send("eth_requestAccounts", []);
-    const signer = provider.getSigner();
-    const transactionsContract = new Contract(contractAddress, contractABI, signer);
+    const transactionsContract = new Contract(contractAddress, contractABI, provider);
 
     return transactionsContract;
 }
@@ -33,6 +31,7 @@ export const TransactionProvider = ({ children }) => {
     const [statements, setStatement] = useState([]);
     const [verifyUser, setVerifyUser] = useState([]);
     const [approveLists, setApproveLists] = useState([]);
+    const [allLoans, setAllLoans] = useState([]);
 
 
     const handleChange = (e, name) => {
@@ -42,10 +41,8 @@ export const TransactionProvider = ({ children }) => {
     const getAllUsers = async () => {
         try {
             if (window.ethereum) {
-                const provider = new BrowserProvider(window.ethereum);
-                await provider.send("eth_requestAccounts", []);
-                const signer = await provider.getSigner();
-                const transactionsContract = new Contract(contractAddress, contractABI, signer);
+                
+                const transactionsContract = createEthereumContract();
     
                 const availableUsers = await transactionsContract.getUsers();
 
@@ -59,11 +56,11 @@ export const TransactionProvider = ({ children }) => {
                     email: user.email,
                     contact: user.contact,
                     city: user.city,
-                    timestamp: new Date(user.timestamp.toNumber() * 1000).toLocaleString()
+                    timestamp: new Date(Number(user.timestamp) * 1000).toLocaleString()
                 }));
 
                 setUsers(structuredUsers);
-                console.log(structuredUsers)
+                // console.log(structuredUsers)
             } else {
                 console.log("Ethereum is not present");
             }
@@ -75,18 +72,15 @@ export const TransactionProvider = ({ children }) => {
     const getLoans = async () => {
         try {
             if (ethereum) {
-                const provider = new BrowserProvider(window.ethereum);
-                await provider.send("eth_requestAccounts", []);
-                const signer = await provider.getSigner();
-                const transactionsContract = new Contract(contractAddress, contractABI, signer);
+                const transactionsContract = createEthereumContract();
     
                 const availableLoan = await transactionsContract.getAllLoan();
 
                 const structuredLoan = availableLoan.map((loan) => ({
                     name: loan.name,
-                    interest: loan.interest.toNumber(),
-                    amount: loan.amount.toNumber(),
-                    timestamp: new Date(loan.timestamp.toNumber() * 1000).toLocaleString()
+                    interest: Number(loan.interest),
+                    amount: Number(loan.amount),
+                    timestamp: new Date(Number(loan.timestamp) * 1000).toLocaleString()
                 }));
 
                 setLoan(structuredLoan);
@@ -102,20 +96,17 @@ export const TransactionProvider = ({ children }) => {
     const getApplyLoans = async () => {
         try {
             if (ethereum) {
-                const provider = new BrowserProvider(window.ethereum);
-                await provider.send("eth_requestAccounts", []);
-                const signer = await provider.getSigner();
-                const transactionsContract = new Contract(contractAddress, contractABI, signer);
+                const transactionsContract = createEthereumContract();
     
                 const availableLoan = await transactionsContract.getApplyLoan();
 
                 const structuredLoan = availableLoan.map((loan) => ({
                     name: loan.name,
-                    interest: loan.interest.toNumber(),
-                    loan_amount: loan.loan_amount.toNumber(),
-                    amount: loan.amount.toNumber(),
+                    interest: Number(loan.interest),
+                    loan_amount: Number(loan.loan_amount),
+                    amount: Number(loan.amount),
                     account: loan.account,
-                    timestamp: new Date(loan.timestamp.toNumber() * 1000).toLocaleString()
+                    timestamp: new Date(Number(loan.timestamp) * 1000).toLocaleString()
                 }));
 
                 setApplyLoan(structuredLoan);
@@ -131,19 +122,16 @@ export const TransactionProvider = ({ children }) => {
     const getStatement = async (account) => {
         try {
             if (ethereum) {
-                const provider = new BrowserProvider(window.ethereum);
-                await provider.send("eth_requestAccounts", []);
-                const signer = await provider.getSigner();
-                const transactionsContract = new Contract(contractAddress, contractABI, signer);
+                const transactionsContract = createEthereumContract();
     
                 const availableLoan = await transactionsContract.getTransaction(account);
                 
                 const structuredLoan = availableLoan.map((loan) => ({
                     title: loan.title,
-                    amount: loan.amount.toNumber(),
+                    amount: Number(loan.amount),
                     description: loan.description,
-                    balance: loan.balance.toNumber(),
-                    timestamp: new Date(loan.timestamp.toNumber() * 1000).toLocaleString()
+                    balance: Number(loan.balance),
+                    timestamp: new Date(Number(loan.timestamp) * 1000).toLocaleString()
                 }));
 
                 setStatement(structuredLoan);
@@ -163,7 +151,7 @@ export const TransactionProvider = ({ children }) => {
                 const userbalance = await transactionsContract.getAcctBalance();
 
                 setApproveLists(userbalance);
-                console.log('Balance: ',userbalance.toNumber())
+                console.log('Balance: ',Number(userbalance))
             } else {
                 console.log("Ethereum is not present");
             }
@@ -177,14 +165,14 @@ export const TransactionProvider = ({ children }) => {
             if (!ethereum) return alert("Please install MetaMask.");
 
             const accounts = await ethereum.request({ method: "eth_accounts" });
-            console.log("Aisha", accounts);
+            // console.log("Aisha", accounts);
 
             if (accounts.length) {
                 setCurrentAccount(accounts[0]);
-                // getAllUsers();
-                // getBalance()
-                // getLoans()
-                // getApplyLoans()
+                getAllUsers();
+                getBalance()
+                getLoans()
+                getApplyLoans()
 
             } else {
                 console.log("No accounts found");
@@ -210,7 +198,6 @@ export const TransactionProvider = ({ children }) => {
         }
     };
 
-
     const userSignup = async () => {
         try {
             if (window.ethereum) {
@@ -218,19 +205,47 @@ export const TransactionProvider = ({ children }) => {
                 const provider = new BrowserProvider(window.ethereum);
                 await provider.send("eth_requestAccounts", []);
                 const signer = await provider.getSigner();
-                const contract = new Contract(contractAddress, contractABI, signer);
+                const transactionsContract = new Contract(contractAddress, contractABI, signer);
     
                 const pubkey = await signer.getAddress();
     
                 // addUser(pubkey, name, username, email, password, contact, city)
-                const { fullname, accountAddress, username, password, email, contact, city } = formData;
-                // const transactionsContract = createEthereumContract();
-
-                // const transactionHash = await transactionsContract.addUser(accountAddress, fullname, username, email, password, contact, city);
-                const transactionHash = await contract.addUser(pubkey, fullname, username, email, password, contact, city);
-                // console.log("Transaction hash:", tx.hash);
+                const { fullname, username, password, email, contact, city } = formData;
                 
+                const transactionHash = await transactionsContract.addUser(pubkey, fullname, username, email, password, contact, city);
+                
+                setIsLoading(true);
+                console.log(`Loading - ${transactionHash.hash}`);
+                await transactionHash.wait();
+                console.log(`Success - ${transactionHash.hash}`);
+                setIsLoading(false);
 
+                window.location.reload();
+            } else {
+                console.log("No ethereum object");
+            }
+        } catch (error) {
+            console.log(error);
+
+            throw new Error("No ethereum object");
+        }
+    }
+    const adminUserSignup = async () => {
+        try {
+            if (window.ethereum) {
+                
+                const provider = new BrowserProvider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                const signer = await provider.getSigner();
+                const transactionsContract = new Contract(contractAddress, contractABI, signer);
+    
+                // const pubkey = await signer.getAddress();
+    
+                // addUser(pubkey, name, username, email, password, contact, city)
+                const { fullname, accountAddress, username, password, email, contact, city } = formData;
+                
+                const transactionHash = await transactionsContract.addUser(accountAddress, fullname, username, email, password, contact, city);
+                
                 setIsLoading(true);
                 console.log(`Loading - ${transactionHash.hash}`);
                 await transactionHash.wait();
@@ -507,7 +522,7 @@ export const TransactionProvider = ({ children }) => {
         <TransactionContext.Provider value={{
             connectWallet, formData, setformData, currentAccount, handleChange, userSignup, verifyUser,
             checkLogin, users, depositAdmin, withdrawAdmin, transferAdmin, addLoan, loans, getLoans,
-            addAplyLoan, applyLoans, addApproveLoan, statements, getStatement
+            addAplyLoan, applyLoans, addApproveLoan, statements, getStatement, adminUserSignup
         }}>
             {children}
         </TransactionContext.Provider>

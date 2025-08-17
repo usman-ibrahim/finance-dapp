@@ -24,9 +24,9 @@ function NewCustomer() {
     const { formData, setformData, handleChange, userSignup } = useContext(TransactionContext)
 
     const handleSubmit = (e) => {
-        const { fullname, accountAddress, username, password, email, contact, city } = formData;
+        const { fullname, username, password, email, contact, city } = formData;
 
-        if (!fullname || !city || !accountAddress || !username || !email || !contact || !password) return alert('Fill the remaining field');
+        if (!fullname || !city || !username || !email || !contact || !password) return alert('Fill the remaining field');
         
         userSignup();
 
@@ -80,12 +80,12 @@ function NewCustomer() {
                                         </p>
                                         <Input name='contact' handleChange={handleChange} />
                                     </div>
-                                    <div className='form-group'>
+                                    {/* <div className='form-group'>
                                         <p>
                                             <labe >Account Address </labe>
                                         </p>
                                         <Input name='accountAddress' handleChange={handleChange} />
-                                    </div>
+                                    </div> */}
                                     <div className='form-group'>
                                         <p>
                                             <labe >City</labe>

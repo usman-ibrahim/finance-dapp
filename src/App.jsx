@@ -19,8 +19,6 @@ import NewCustomerAdmin from './screens/NewCustomerAdmin';
 import ApplyLoan from './screens/ApplyLoan';
 import ApproveLoan from './screens/ApproveLoan';
 import AccountStatement from './screens/AccountStatement';
-import AddUserForm from './screens/AddUserForm';
-
 
 function App() {
   const [count, setCount] = useState(0)
@@ -42,7 +40,6 @@ function App() {
       <Route path='/applyloan' element={<ApplyLoan />} />
       <Route path='/approveloan' element={<ApproveLoan />} />
       <Route path='/acctstatement' element={<AccountStatement />} />
-      <Route path='/userform' element={<AddUserForm />} />
     </Routes>
   )
 }

@@ -20,14 +20,14 @@ const Input = ({ placeholder, name, type, value, handleChange }) => (
 
 function NewCustomerAdmin() {
 
-    const { formData, setformData, handleChange, userSignup } = useContext(TransactionContext)
+    const { formData, setformData, handleChange, adminUserSignup } = useContext(TransactionContext)
 
     const handleSubmit = (e) => {
         const { fullname, accountAddress, username, password, email, contact, city } = formData;
 
         if (!fullname || !city || !accountAddress || !username || !email || !contact || !password) return alert('Fill the remaining field');
         
-        userSignup();
+        adminUserSignup();
 
         e.preventDefault();
     }
@@ -38,7 +38,7 @@ function NewCustomerAdmin() {
             <div className='main-content'>
                 <NavBar />
                 <div className='content'>
-                    <h1>New Customer</h1>
+                    <h1>New Customer (Admin)</h1>
                     <div className='menu-conten create-customer'>
                         <h3>Create New User</h3>
 
